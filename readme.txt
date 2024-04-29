@@ -163,5 +163,5 @@ TIME
 
 EXTRA NOTES
 - Registering the server in the beginngin with other ones is extremely buggy and has not been tested
-- For QUIT & PRIVMSG, continue entering other commands as sometimes the message will be printed 
+- For QUIT, SQUIT and PRIVMSG, continue entering other commands as sometimes the message will be printed 
 in the next output, but should return to normal after a few commands
