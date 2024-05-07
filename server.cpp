@@ -1079,28 +1079,80 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    printf(":waiting for client connections...\n");
-    while (1) {
-        sin_size = sizeof their_addr;
-        new_fd = accept(sockfd, (struct sockaddr*)&their_addr, &sin_size);
-        if (new_fd == -1) {
-            perror("accept");
-            continue;
-        }
-        inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr*)&their_addr), s, sizeof s);
+    // Server registered, connect to other servers
+    while (true) {
+        bool connected = false;
+        for (auto& addr : serverConfig.SOCK_ADDR) {
+            int server_sockfd;
+            struct addrinfo hints, *serverinfo, *p;
+            int rv;
 
-        // Get port number
-        if (their_addr.ss_family == AF_INET) {
-            struct sockaddr_in *sin = (struct sockaddr_in *)&their_addr;
-            snprintf(port, sizeof port, "%d", ntohs(sin->sin_port));
-        } else {
-            struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&their_addr;
-            snprintf(port, sizeof port, "%d", ntohs(sin6->sin6_port));
+            memset(&hints, 0, sizeof hints);
+            hints.ai_family = AF_UNSPEC;
+            hints.ai_socktype = SOCK_STREAM;
+
+            if ((rv = getaddrinfo(addr.first.c_str(), addr.second.c_str(), &hints, &serverinfo)) != 0) {
+                fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+                continue;
+            }
+
+            // Loop through all the results and connect to the first we can
+            for (p = serverinfo; p != NULL; p = p->ai_next) {
+                if ((server_sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+                    continue;
+                }
+
+                if (connect(server_sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+                    close(server_sockfd);
+                    continue;
+                }
+
+                // Connection successful
+                printf("Connected to %s:%s\n", addr.first.c_str(), addr.second.c_str());
+                servers.push_back(Server(addr.first));
+                servers.back().sockfd = server_sockfd;
+                connected = true;
+                break;
+            }
+
+            freeaddrinfo(serverinfo); 
+
+            if (connected) {
+                break; 
+            }
         }
 
-        printf(":got connection from %s:%s\n", s, port); // Print IP address and port
-        thread(handle_client, new_fd).detach(); // detach thread. allow to run independently
+        // If no connection is established, switch to listening mode
+        if (!connected) {
+            printf("Listening for server...\n");
+        } sleep(5);
+
+        if (connected) {
+            printf(":waiting for client connections...\n");
+            while (1) {
+                sin_size = sizeof their_addr;
+                new_fd = accept(sockfd, (struct sockaddr*)&their_addr, &sin_size);
+                if (new_fd == -1) {
+                    perror("accept");
+                    continue;
+                }
+                inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr*)&their_addr), s, sizeof s);
+
+                // Get port number
+                if (their_addr.ss_family == AF_INET) {
+                    struct sockaddr_in *sin = (struct sockaddr_in *)&their_addr;
+                    snprintf(port, sizeof port, "%d", ntohs(sin->sin_port));
+                } else {
+                    struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&their_addr;
+                    snprintf(port, sizeof port, "%d", ntohs(sin6->sin6_port));
+                }
+
+                printf(":got connection from %s:%s\n", s, port); // Print IP address and port
+                thread(handle_client, new_fd).detach(); // detach thread. allow to run independently
+            }
+            sem_destroy(&sem);
+            return 0;
+
+        }
     }
-    sem_destroy(&sem);
-    return 0;
 }

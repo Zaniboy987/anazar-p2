@@ -8,17 +8,19 @@ Note:
 VALUE RECEVIED BY USING THE "hostname -I", COMMAND BEFORE RUNNING 
 EACH SERVER
 
+
+
 In order to compile the program enter:
 >> make
 
 
-REGISTERING THE SERVER
+REGISTERING THE SERVER Steps
 
 For creating respective servers, the formt to follow when entering is:
 >> ./server <server.conf file for respective server>
 
 
-PASS:
+1) PASS:
 - For entering the password to register the server, the <password> should match
 the string given in the respective server.conf file. The format is:
 Pass <password> <version> <flags> [<options>]
@@ -27,29 +29,33 @@ A real-time example where <password> = password, would be:
 PASS password 0210010000 IRC|aBgH$ Z
 
 
-SERVER:
+2) SERVER:
 - For registering a server name where <servername> should be the IP address such as
 by using the command "hostname -I" where the format should look like:
 SERVER <servername> <hopcount> <token> <info>
 
 A real-time example for this would be
 SERVER 128.226.114.206 5 34 :Experimental server
+SERVER 128.226.114.200 4 30 :Experimental server
 
 
-NICK:
+
+3) NICK:
 - For registering the nickname and realname of the server where the sample format is:
 NICK  <nickname> <hopcount> <username> <host> <servertoken> <umode> <realname>
 
 A real-time example for this would be 
 NICK syrk 5 kalt millennium.stealth.net 34 +i :Christophe Kalt
+NICK burt 5 molt millennium.stealth.net 34 +i :Jennifer Weggins
 
 
 
-- AFTER THE SERVER IS 'REGISTERED', THE SERVER SIDE WILL OUTPUT ":waiting for client connections..."
-WHICH IS WHERE THE BENEATH COMMANDS WILL BE ENTERED  
+- AFTER THE SERVER IS 'REGISTERED', THE SERVER SIDE WILL WAIT UNTIL THE OTHER SERVER HAS
+CONNECTED BEFORE ACKNOWLEDGING SERVER-SERVER CONNECTION THEREAFTER WAITING FOR CLIENTS
 
 
-// client is to be used after modifications are made and when
+// client is to be used once connection between servers is established and that client.conf
+has been correctly configured in order to connect to the appropriate server
 For example
 >> ./client <client.conf>
 
@@ -167,6 +173,7 @@ TIME
 
 
 EXTRA NOTES
-- Registering the server in the beginngin with other ones is extremely buggy and has not been tested
 - For QUIT, SQUIT and PRIVMSG, continue entering other commands as sometimes the message will be printed 
 in the next output, but should return to normal after a few commands
+- NJOIN is really buggy
+- PRIVMSG between servers has not been implemented
