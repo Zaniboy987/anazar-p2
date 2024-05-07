@@ -223,18 +223,16 @@ void handle_client(int sockfd) {
                     if (decoded_password == server_password) {
                         commandRecognized = true;
                         // Respond to the client
-                        string response = ":" + nickname_of_server + " :Password correct for user " + client.nickname + "\r\n";
-                        cout << response;
+                        string response = ":" + nickname_of_server + " :Password correct for user " + client.nickname + "\r\n";                       
                         send_message(client.sockfd, response);
                         passEntered = true, client.passEntered = true;                            
                     } else {
-                        string response = ":" + nickname_of_server + " 464 :Password incorrect\r\n";
-                        cout << response;
+                        string response = ":" + nickname_of_server + " 464 :Password incorrect\r\n";                       
                         send_message(client.sockfd, response);
                     }
                 } else {
                     string err_response = ":" + nickname_of_server + " 462 " + nickname + " :Unauthorized command (already registered)\r\n";
-                    cout << err_response;
+                    
                     send_message(client.sockfd, err_response);
                 }
             } // end of PASS command
@@ -249,7 +247,7 @@ void handle_client(int sockfd) {
                     temp_pass = message.substr(colon_pos + 1); // get password after ':'
                 } else {
                     string err_response = ":" + nickname_of_server + " 432 " + nickname + " :Erroneous nickname\r\n";
-                    cout << err_response;
+                    
                     send_message(client.sockfd, err_response);
                     continue;
                 }
@@ -257,7 +255,7 @@ void handle_client(int sockfd) {
                 for (const auto& c : clients) {
                     if (c.nickname == nickname) {
                         string err_response = ":" + nickname_of_server + " 431 " + nickname + " :Nickname is already in use\r\n";
-                        cout << err_response;
+                        
                         send_message(client.sockfd, err_response);
                         continue;
                     }
@@ -300,7 +298,7 @@ void handle_client(int sockfd) {
                 
                 if (nickname_found && !password_matched) { // Nickname found but password mismatch
                     string err_response = ":" + nickname_of_server + " 464 " + nickname + " :Password incorrect\r\n";
-                    cout << err_response;
+                    
                     send_message(client.sockfd, err_response);
                     continue;
                 }
@@ -315,7 +313,7 @@ void handle_client(int sockfd) {
                         passwordFile.close();
                     }
                     send_message(client.sockfd, response);
-                    cout << response;
+                    
                 } else {
                     client.nickname = nickname;
                     string response = ":" + nickname_of_server + " :Nickname changed to " + nickname + "\r\n";
@@ -323,8 +321,7 @@ void handle_client(int sockfd) {
                     if (passwordFile.is_open()) {
                         passwordFile << client.nickname << ":" << nickPass << endl; // Save nickname and password
                         passwordFile.close();
-                    }
-                    cout << response;
+                    }                    
                     send_message(client.sockfd, response);
                 }     
                 nick = true;
@@ -340,7 +337,7 @@ void handle_client(int sockfd) {
                 for (const auto& c : clients) {
                     if (c.username == username) {
                         string err_response = ":" + nickname_of_server + " 462 " + username + " :Username is already in use\r\n";
-                        cout << err_response;
+                        
                         send_message(client.sockfd, err_response);
                     }
                 }
@@ -362,7 +359,6 @@ void handle_client(int sockfd) {
                     }
 
                     send_message(client.sockfd, response1);
-                    cout << "USER " << username << " " << realname << "\r\n" << response1;
                 } else {
                     lock_guard<mutex> lock(clientsMutex);
                     string response;
@@ -370,8 +366,7 @@ void handle_client(int sockfd) {
                         response = ":" + nickname_of_server + " :Username set to " + username + " and real name set to " + realname.substr(5) + "\r\n";
                     } else {
                         response = ":" + nickname_of_server + " :Username set to " + username + " and real name set to " + realname + "\r\n";
-                    }
-                    cout << response;
+                    }                   
                     send_message(client.sockfd, response);
                 }
 
@@ -413,7 +408,7 @@ void handle_client(int sockfd) {
                 } else {
                     string response = ":" + nickname_of_server + " 451 :You have not registered\r\n";
                     send_message(client.sockfd, response);
-                    cout << response;
+                    
                 }
                 break;
             } // end of QUIT command
@@ -428,7 +423,7 @@ void handle_client(int sockfd) {
                 if (server != servers.at(0).servername){
                     string err_response = ":" + nickname_of_server + " 402 " + server + ":No such server\r\n";
                     send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    
                     continue;
                 }
 
@@ -449,7 +444,7 @@ void handle_client(int sockfd) {
                 if (!client.registered) { // Check if the client is registered
                     string err_response = ":" + nickname_of_server + " 451 :You have not registered\r\n";
                     send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    
                     continue;
                 }
 
@@ -472,7 +467,7 @@ void handle_client(int sockfd) {
                     }
                     string err_response = ":" + nickname_of_server + " " + client.nickname + ":Left all channels\r\n";
                     send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    
                     continue;
                 } // Leave all currently joined channels.
 
@@ -487,8 +482,7 @@ void handle_client(int sockfd) {
                         // Check if channelName is valid (starts with '#', '&', '+', or '!')
                         if (channelName.empty() || (channelName[0] != '#' && channelName[0] != '&' && channelName[0] != '+' && channelName[0] != '!')) {
                             string err_response = ":" + nickname_of_server + " 403 " + client.nickname + " " + channelName + " :No such channel\r\n";
-                            send_message(client.sockfd, err_response);
-                            cout << err_response;
+                            send_message(client.sockfd, err_response);                            
                             continue;
                         }
 
@@ -502,8 +496,7 @@ void handle_client(int sockfd) {
 
                         if (isOnChannel && channels.size() > 0) { // Check if client already joined the channel
                             string err_response = ":" + nickname_of_server + " 443 " + client.nickname + " " + channelName + " :is already on channel\r\n";
-                            send_message(client.sockfd, err_response);
-                            cout << err_response;
+                            send_message(client.sockfd, err_response);                           
                             continue;
                         }
 
@@ -521,7 +514,7 @@ void handle_client(int sockfd) {
                                     response += user + " ";
                                 }
                                 response += "\n";
-                                cout << response;
+                                
                             }
                         }
 
@@ -554,7 +547,7 @@ void handle_client(int sockfd) {
                             response += ":" + nickname_of_server + " 353 " + client.nickname + " = " + channels.at(channels.size() - 1).channelName + " :" + channels.at(channels.size() - 1).users.at(0) + "\n";
                         }
                     }
-                    cout << response;
+                    
                     send_message(client.sockfd, response);                    
                 }
             }  // end of JOIN command
@@ -565,15 +558,13 @@ void handle_client(int sockfd) {
 
                 if (!client.registered) { // Check if the client is registered
                     string err_response = ":" + nickname_of_server + " 451 :You have not registered\r\n";
-                    send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    send_message(client.sockfd, err_response);                   
                     continue;
                 }
 
                 if (match.size() != 4) { // check for 3 parameters
                     string err_response = ":" + nickname_of_server + " 461 " + client.nickname + " NJOIN :Not enough parameters\r\n";
-                    send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    send_message(client.sockfd, err_response);                  
                     continue;
                 }
 
@@ -583,8 +574,7 @@ void handle_client(int sockfd) {
 
                 if (client.registered) { // Check if the client is already registered
                     string err_response = ":" + nickname_of_server + " 462 " + client.nickname + " :Unauthorized command (already registered)\r\n";
-                    send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    send_message(client.sockfd, err_response);            
                     continue;
                 }
 
@@ -622,8 +612,7 @@ void handle_client(int sockfd) {
 
                 if (!client.registered) { // Check if the client is registered
                     string err_response = ":" + nickname_of_server + " 451 :You have not registered\r\n";
-                    send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    send_message(client.sockfd, err_response);                   
                     continue;
                 }
 
@@ -669,8 +658,7 @@ void handle_client(int sockfd) {
                         // Check if channelName is valid (starts with '#', '&', '+', or '!')
                         if (channelName.empty() || (channelName[0] != '#' && channelName[0] != '&' && channelName[0] != '+' && channelName[0] != '!')) {
                             string err_response = ":" + nickname_of_server + " 403 " + client.nickname + " " + channelName + " :No such channel\r\n";
-                            send_message(client.sockfd, err_response);
-                            cout << err_response;
+                            send_message(client.sockfd, err_response);                          
                             continue;
                         }
 
@@ -685,7 +673,7 @@ void handle_client(int sockfd) {
                         if (!isOnChannel) { // Check if client is on the channel
                             string err_response = ":" + nickname_of_server + " 442 " + client.nickname + " " + channelName + " :You're not on that channel\r\n";
                             send_message(client.sockfd, err_response);
-                            cout << err_response;
+                            
                             continue;
                         }
 
@@ -707,7 +695,7 @@ void handle_client(int sockfd) {
                     }
                 }
                 send_message(client.sockfd, response);
-                cout << response;
+                
             } // end of PART command
 
             if (regex_match(message, match, topic_regex)) { // TOPIC COMMAND
@@ -718,7 +706,7 @@ void handle_client(int sockfd) {
                 if (!client.registered) {
                     string err_response = ":" + nickname_of_server + " 451 :You have not registered\r\n";
                     send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    
                     continue;
                 }
 
@@ -746,7 +734,6 @@ void handle_client(int sockfd) {
                                     c.topic = newTopic;
                                     string topic_response = ":" + nickname_of_server + " 332 " + client.nickname + " " + channelName + " :" + newTopic + "\r\n";
                                     send_message(client.sockfd, topic_response);
-                                    cout << topic_response;
                                     break;
                                 } } } }
                 }
@@ -755,13 +742,13 @@ void handle_client(int sockfd) {
                 if (channels.size() == 0) {
                     string err_response = ":" + nickname_of_server + " 442 " + client.nickname + " " + channelName + " :You're not on that channel\r\n";
                     send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    
                     continue;
                 }
 
                 if (!first) {
                     string response = ":" + nickname_of_server + " 461 " + client.nickname + " TOPIC :Not enough parameters\r\n";
-                    cout << response;
+                    
                     continue;
                 }
 
@@ -778,8 +765,7 @@ void handle_client(int sockfd) {
 
                 if (!channelIsThere) {
                     string err_response = ":" + nickname_of_server + " 403 " + client.nickname + " " + channelName + " :No such channel\r\n";
-                    send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    send_message(client.sockfd, err_response);                    
                     continue;
                 }
 
@@ -791,8 +777,7 @@ void handle_client(int sockfd) {
 
                 if (!clientOnChannel) {
                     string err_response = ":" + nickname_of_server + " 442 " + client.nickname + " " + channelName + " :You're not on that channel\r\n";
-                    send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    send_message(client.sockfd, err_response);                   
                     continue;
                 }
 
@@ -800,27 +785,23 @@ void handle_client(int sockfd) {
                     channels.at(channelIndex).topic.clear();
                     string topic_response = ":" + nickname_of_server + client.nickname + " " + channelName + " :Topic reset\r\n";
                     send_message(client.sockfd, topic_response);
-                    cout << topic_response;
                 } else if (sec && !(third)) { // If empty string, remove the topic
                     string topic_response = ":" + nickname_of_server + " 331 " + client.nickname + " " + channelName + " :" + channels.at(channelIndex).topic + "\r\n";
                     send_message(client.sockfd, topic_response);
-                    cout << topic_response;
                 } else { // Change the topic
                     channels.at(channelIndex).topic = newTopic;
                     string topic_response = ":" + client.nickname + "!~" + client.username + "@" + nickname_of_server + " TOPIC " + channelName + " :" + newTopic + "\r\n";
                     send_message(client.sockfd, topic_response);
-                    cout << topic_response;
                 }
             } // end of TOPIC command 
 
             if (regex_match(message, match, names_regex)) { // NAMES COMMAND
                 lock_guard<mutex> lock(clientsMutex);
                 commandRecognized = true;
-
                 if (!client.registered) { // Check if the client is registered
                     string err_response = ":" + nickname_of_server + " 451 :You have not registered\r\n";
                     send_message(client.sockfd, err_response);
-                    cout << err_response;
+                    
                     continue;
                 }
 
@@ -844,8 +825,7 @@ void handle_client(int sockfd) {
                         }
                     }
                     response += "\r\n";
-                    send_message(client.sockfd, response);
-                    cout << response;
+                    send_message(client.sockfd, response);                  
                     continue;
                 } 
 
@@ -857,8 +837,7 @@ void handle_client(int sockfd) {
                         }
                     }
                     response += "\r\n";
-                    send_message(client.sockfd, response);
-                    cout << response;
+                    send_message(client.sockfd, response);               
                     continue;
                 }
 
@@ -889,23 +868,20 @@ void handle_client(int sockfd) {
                     }
                 }
                 response += "\r\n";
-                send_message(client.sockfd, response);
-                cout << response;
+                send_message(client.sockfd, response);               
             } // end of NAMES command
 
             if (regex_match(message, match, time_regex)) { // TIME command
                 lock_guard<mutex> lock(clientsMutex);
                 commandRecognized = true;
-
                 if (client.registered) {
                     string current_time = get_current_time();
                     string response = ":" + client.nickname + "!~" + client.username + "@" + nickname_of_server + " 391 " + current_time + "\r";
-                    cout << response;
+                    
                     send_message(client.sockfd, response);
                 } else {
                     string response = ":" + nickname_of_server + " 451 :You have not registered\r\n";
-                    send_message(client.sockfd, response);
-                    cout << response;
+                    send_message(client.sockfd, response);                    
                 }
             } // end of Time command
 
@@ -916,7 +892,7 @@ void handle_client(int sockfd) {
                 if (!registered) {
                     string response = ":" + nickname_of_server + " 451 " + client.nickname + " :You have not registered\r\n";
                     send_message(client.sockfd, response);
-                    cout << response;
+                    
                     continue;
                 }
 
@@ -943,8 +919,7 @@ void handle_client(int sockfd) {
                     }
                     if (!target_exists) { // error response if target doesn't exist
                         string err_response = ":" + nickname_of_server + " 401 " + client.nickname + " " + target + " :No such nick/channel\r\n";
-                        send_message(client.sockfd, err_response);
-                        cout << err_response;
+                        send_message(client.sockfd, err_response);                       
                         continue;
                     }
                 }
@@ -952,7 +927,6 @@ void handle_client(int sockfd) {
                 if (!is_channel) {
                     string privmsg_response = ":" + client.nickname + "!~" + client.username + "@" + nickname_of_server + " PRIVMSG " + target + " :" + msg + "\r\n";
                     send_message(clients.at(targetIndex).sockfd, privmsg_response);
-                    cout << privmsg_response;
                 }
 
                 // If it's a channel, broadcast the message to all users in the channel
@@ -964,15 +938,13 @@ void handle_client(int sockfd) {
                                     if (c.nickname == user) {
                                         string privmsg_broadcast = ":" + client.nickname + "!~" + client.username + "@" + nickname_of_server + " PRIVMSG " + target + " :" + msg + "\r\n";
                                         send_message(c.sockfd, privmsg_broadcast);
-                                        cout << privmsg_broadcast;
                                         break;
                                     } } } } } }
             } // end of PRIVMSG command
             
             if (!commandRecognized) { // if no command recognized
                 string error_msg = ":" + nickname_of_server + " 451 " + message + " :Unknown command\r\n";
-                send_message(client.sockfd, error_msg);
-                cout << error_msg; 
+                send_message(client.sockfd, error_msg); 
             }
         }
     }
@@ -994,60 +966,6 @@ int main(int argc, char* argv[]) {
     ServerConfig serverConfig = parseServerConfig(configFileName);
     ServerConfig nickname_server = parseServerConfig(configFileName);
     int counter = 0;
-
-    // Connect to servers specified in server.conf file
-    while (counter <= 3) {
-        auto addrIt = serverConfig.SOCK_ADDR.begin();
-        while (addrIt != serverConfig.SOCK_ADDR.end()) {
-            cout << "Trying to connect to " << addrIt->first << ":" << addrIt->second << endl;
-            int serverSockfd;
-            struct addrinfo hints, *servinfo, *p;
-            int rv;
-
-            memset(&hints, 0, sizeof hints);
-            hints.ai_family = AF_UNSPEC;
-            hints.ai_socktype = SOCK_STREAM;
-
-            if ((rv = getaddrinfo(addrIt->first.c_str(), addrIt->second.c_str(), &hints, &servinfo)) != 0) {
-                cout << "getaddrinfo: " << gai_strerror(rv) << endl;
-                addrIt++;
-                continue;
-            }
-
-            for (p = servinfo; p != NULL; p = p->ai_next) {
-                if ((serverSockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-                    perror("client: socket");
-                    continue;
-                }
-
-                if (connect(serverSockfd, p->ai_addr, p->ai_addrlen) == -1) {
-                    close(serverSockfd);
-                    perror("Server: connect");
-                    continue;
-                }
-                break;
-            }
-
-            if (p == NULL) {
-                cout << "Server: failed to connect" << endl;
-                addrIt++;
-                freeaddrinfo(servinfo);
-                continue;
-            }
-
-            cout << "Connected to server successfully!" << endl;
-
-            freeaddrinfo(servinfo);
-            break;
-        }
-
-        if (addrIt != serverConfig.SOCK_ADDR.end()) {
-            break;
-        }
-        // Sleep for a while before retrying
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        counter++;
-    }
 
     int sockfd, new_fd, rv;
     int yes = 1;
@@ -1104,7 +1022,7 @@ int main(int argc, char* argv[]) {
         perror(":sigaction");
         exit(1);
     }
-    printf(":waiting for server registration...\n");
+    printf(":register server...\n");
 
     // server authentication
     bool isRegistered = false, passEntered = false, serverNamed = false, serverNicked = false;
@@ -1161,7 +1079,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    printf(":waiting for connections...\n");
+    printf(":waiting for client connections...\n");
     while (1) {
         sin_size = sizeof their_addr;
         new_fd = accept(sockfd, (struct sockaddr*)&their_addr, &sin_size);

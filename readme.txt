@@ -3,18 +3,20 @@ Email: anazar1@binghamton.edu
 
 Note: 
 - All commands are capitalized (i.e. NICK, USER, TIME, etc.)
-- '>>' is used for the terminal and not to be entered 
-- Under client.conf, make sure that SERVER_IP=y.y.y.y is set to the
-value outputted by running "hostname -I", before running (same concept for server config files)
+- '>>' is used for the terminal on server side
+- UNDER client.conf, MAKE SURE THAT SERVER_IP=y.y.y.y IS SET TO THE
+VALUE RECEVIED BY USING THE "hostname -I", COMMAND BEFORE RUNNING 
+EACH SERVER
 
 In order to compile the program enter:
 >> make
 
+
+REGISTERING THE SERVER
+
 For creating respective servers, the formt to follow when entering is:
 >> ./server <server.conf file for respective server>
 
-Since the server registration was really buggy, placed "printf(":waiting for server registration...\n");"
-as an indicator for the current server to register itself with the following 3 commands beneath:
 
 PASS:
 - For entering the password to register the server, the <password> should match
@@ -43,8 +45,11 @@ NICK syrk 5 kalt millennium.stealth.net 34 +i :Christophe Kalt
 
 
 
+- AFTER THE SERVER IS 'REGISTERED', THE SERVER SIDE WILL OUTPUT ":waiting for client connections..."
+WHICH IS WHERE THE BENEATH COMMANDS WILL BE ENTERED  
 
-// client is to be used after modifications are made and when ""
+
+// client is to be used after modifications are made and when
 For example
 >> ./client <client.conf>
 
